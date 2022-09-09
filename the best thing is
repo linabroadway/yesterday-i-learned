@@ -1,0 +1,46 @@
+RDS instances are encrypted by default... whatever that means.
+If you work for AWS and you update your service status to be down, it's your fault! You get fired!
+The default settings for MySQL instances on RDS is stupid. Create a parameter group with (significantly) longer timeouts.
+Django-South does not work on RDS.
+Copying a file across S3 buckets is just copying its key -- S3 is one uniform storage resource. Having a key that points to a file in both buckets means that, effectively, the file exists in both buckets.
+htop missing
+Upgrading an instance: stop the instance, wait for a while, and select "Change Instance Type"
+VPC is Virtual Private Cloud, not Virtual PC. The default VPC is "weird" [sic] and when setting up a new stack, you should destroy the default VPC and create a new one.
+If you can't move an RDS server's region, at least move the EC2 instances' availabiltiy zones to match it.
+/etc/httpd/conf/httpd.conf has a load of stuff you can disable.
+/etc/httpd/conf.d/wsgi.conf also has a load of stuff you can tweak.
+Get everything from an s3 bucket: s3cmd get s3://(bucket name)/*
+EC2 will wipe out all of your authorized_keys in newly-spawned instances unless the instance was created with the "no reboot" option checked.
+You can restore a Postgres snapshot with a different name while the current one is being deleted, then rename the new database to the old name to replace it with no downtime.
+From within an instance, get its hostname: curl http://169.254.169.254/latest/meta-data/public-hostname
+Blue-green deployment involves spinning up a new version of the application, waiting for deployment to complete and its state verified, then replacing green (current) instances in the load balancer with the ones you just spun up (blue).
+Load balancers send your requests to different servers (perhaps evenly, perhaps not). Auto scaling groups tell the thingy how many servers you want to have. Launch configurations tell the bois how big you want each server to be.
+Sections in the ~/.aws/config file, apart from [default], need to be prefixed with profile, i.e. [profile whatever]. However, sections in the ~/.aws/credentials file must not be prefixed with profile, so only [whatever] will work.
+You make an instance so you can make an AMI with it.
+You make an AMI so you can specify one in a Launch Configuration (LC).
+You make a Launch Configurations because Auto Scaling Groups (ASGs) need one to know what to launch and scale up/down.
+You make an ASG so you can have multiple instances of the same AMI doing the same thing.
+You can "View/edit rules" for each load balancer (under Listeners) to configure which requests get sent to which Target Group, depending on domains, headers, or request path. For some reason you need at least one Target Group (TG) for your Application Load Balancer (ALB) because I don't know.
+You make a load balancer because otherwise only one instance in your ASG will get requests. Also, you can only attach a Route53 record set to a load balancer or directly to an instance, so you do that. After that, maybe you can have a working website. All these are bound by Security Groups (SGs), which are just firewall rules.
+Amazon Aurora is "one-tenth the cost" of enterprise databases, not one-tenth the cost of their other offerings.
+Simply changing the the ASG's launch configuration does not imply instances that are not launched by that LC will be scaled down. So if you want to change the instance type of an ASG from A to B, you have to detach instances from A first.
+Adding query to the aws command line gives you just that part of the response. AWS_PROFILE=foo aws rds describe-db-snapshots --db-snapshot-identifier dont-delete-this-snapshot --query "DBSnapshots[0].PercentProgress" would give 100 instead of the JSON object.
+"Cloudfront only accepts certificates hosted in region us-east-1." - Sebastian, in 2017
+You can't share (with another account) an RDS snapshot that was encrypted with the default RDS key.
+CloudWatch is a hypervisor. It can tell how much CPU an EC2 instance is using, and how much network traffic goes in and out of it, but it does not know the instance's internals, e.g. memory, process count, ?.
+aws s3 cp works similar to cp, except -r doesn't work, but --recursive does.
+To use async/await in the JS SDK, you can just add .promise() after most functions calls.
+RDS instances that are stopped go back online after 7 days.
+RDS: change the instant type after you change the parameter group, so you don't need to restart twice.
+One of the most popular questions among bluegill anglers is“when is the best time for [ice fishing bluegill](https://reelnrods.com/ice-fishing-bluegills/) ?” And it’s a good question!Bluegills are very interesting fish that become dormant during their winter months, and they will spend those months in deeper waters instead of spawning.
+Try to do everything through terraform if you can so you keep the scripts in sync for free.
+AWS can fail to launch an (EC2) instance if they run out of instances of that type, often when the instance type was newly-introduced.
+S3 incomplete multi-part uploads can cost money even though you can't see them, so set up a lifecycle policy to delete them (or use that tool).
+RDS only: upgrade postgres to the highest minor version before you upgrade to the next major version. Once you are on the latest minor version, you can only upgrade to the latest next major version (ie you can't upgrade from 10.10 to 11.0 if 11.1 exists).
+Enabling multi AZ is a zero downtime operation.
+Disabling multi AZ is also a zero downtime operation. The point of the exercise is: you need to enable multi AZ to upgrade the postgres version with no downtime.
+Modifying RDS instance type with multi AZ enabled will also reduce (but not completely eliminate) downtime. The two databases will be upgraded stepwise, but there may be a DNS changeover period where neither instances are usable.
+Databases with replicas cannot upgrade major versions unless you remove the read only database first.
+Use resize2fs /dev/nvme0n1p1 as part of the officially sanctioned way to grow a partition after it's resized from the console.
+Every query on kibana (and grafana?) that does not use .keyword on a string will be a wildcard search on the field for values containing that string. For example, message = "foo" will return any message containing foo, while message.keyword = "foo" will return messages that are exactly foo.
+AWS Lambda is a bit like programming in the mainframe: you send it a function, and it does the stuff. You can't debug it locally; you know if fails once it fails.
